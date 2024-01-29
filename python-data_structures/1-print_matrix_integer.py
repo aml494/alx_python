@@ -12,4 +12,3 @@ if __name__ == "__main__":
     print_matrix_integer(matrix)
     print("--")
     print_matrix_integer()
-    
