@@ -1,56 +1,37 @@
+"""
+This module makes 2 API requests and 
+uses the information given to write it to a JSON file
+"""
+
 import json
-import requests
-import sys
+import requests 
+from sys import argv
 
-def get_user_info(employee_id):
-    """
-    Retrieve user information (ID and username) using the given employee_id.
-    
-    Args:
-        employee_id (int): The ID of the employee.
+def get_info(id):
+    url1 = f'https://jsonplaceholder.typicode.com/users/{id}/todos'
+    empurl= f'https://jsonplaceholder.typicode.com/users/{id}'
+    # Get todo tasks
+    res1 = requests.get(url1)
+    data1 = res1.json()
+    # Get employee information
+    res2 = requests.get(empurl)
+    employeedata = res2.json()
+
+    USER_ID = employeedata['id']
+    USERNAME = employeedata['username']
+    TOTAL_NUMBER_OF_TASKS = len(data1)
+    tasks = []
+    for task in data1:
+        tasks.append({"task": task['title'], "completed": task['completed'], "username": USERNAME})
         
-    Returns:
-        Tuple[int, str]: A tuple containing the user's ID and username.
-    """
-    user_response = requests.get(f"https://jsonplaceholder.typicode.com/users/{employee_id}")
-    if user_response.status_code == 200:
-        user_data = user_response.json()
-        return user_data['id'], user_data['username']
-    else:
-        return None, None
-
-def main():
-    """
-    Main function to export user tasks to a JSON file.
-    """
-    if len(sys.argv) != 2:
-        print("Usage: python3 2-export_to_JSON.py <employee_id>")
-        sys.exit(1)
-
-    employee_id = sys.argv[1]
-
-    user_id, username = get_user_info(employee_id)
-
-    if user_id is None:
-        print(f"User with ID {employee_id} not found.")
-        sys.exit(1)
-
-    response = requests.get(f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}")
-    tasks = response.json()
-
-    json_data = {user_id: []}
-
-    for task in tasks:
-        task_completed_status = task['completed']
-        task_title = task['title']
-        json_data[user_id].append({"task": task_title, "completed": task_completed_status, "username": username})
-
-    json_filename = f"{user_id}.json"
-
-    with open(json_filename, 'w') as jsonfile:
-        json.dump(json_data, jsonfile, indent=2)
-
-    print(f"Data has been exported to {json_filename}")
+    dictionary = {USER_ID: tasks}
+    with open(f'{id}.json', 'w') as file:
+        json.dump(dictionary, file, indent=4)
 
 if __name__ == "__main__":
-    main()
+    if len(argv) > 1:
+        for arg in argv[1:]:
+            get_info(int(arg))
+    else:
+        for i in range(1, 11):
+            get_info(i)
