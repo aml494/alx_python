@@ -22,3 +22,4 @@ States= cursor.fetchall()
 
 for state in States:
     print(state)
+    
