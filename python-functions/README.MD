@@ -1,2 +1,1 @@
-# python is amazing
- 
+#python is amazing 
